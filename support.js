@@ -290,6 +290,7 @@ function getUsers(token) {
                             .catch(error => {
                                 console.error('There has been a problem with your fetch operation:', error);
                             })
+                            
 
 
                         }
@@ -297,7 +298,7 @@ function getUsers(token) {
                     .catch(error => {
                         console.error('There has been a problem with your fetch operation:', error);
                     })
-
+                    profitForm.stlye.display = "none";
                   });
 
                   let contractButton = newUser.querySelector('#support-contract-button');
