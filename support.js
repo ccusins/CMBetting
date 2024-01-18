@@ -353,8 +353,8 @@ function getUsers(token) {
 }
 
 document.addEventListener('DOMContentLoaded', function() { 
-
-    const token = 'f72754b3-cd78-4472-990a-22f581bf10c2';
+    
+    const token = process.env.API_KEY;
     getUsers(token);
     setUpDepositListener(token);
     setUpAccountListener(token);
