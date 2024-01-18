@@ -354,7 +354,7 @@ function getUsers(token) {
 
 document.addEventListener('DOMContentLoaded', function() { 
     
-    const token = API_KEY;
+    const token = "f72754b3-cd78-4472-990a-22f581bf10c2";
     getUsers(token);
     setUpDepositListener(token);
     setUpAccountListener(token);
