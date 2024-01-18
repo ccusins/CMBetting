@@ -280,11 +280,13 @@ function getUsers(token) {
                     .then(data => {
                         let isSuccess = data.success;
                         if (isSuccess) {
+                            console.log(data);
                             let profit = parseFloat(data.profit);
+
                             let addProfitValue = parseFloat(profitForm.querySelector('#support-users-profit-value').value);
-                            
+                            console.log(addProfitValue);
                             profit += addProfitValue;
-                            fetch(`https://cmbettingoffers.pythonanywhere.com/adduserprofit/${encodeURIComponent(token)}/${encodeURIComponent(itemData.userid)}/${encodeURIComponent(profit)}`)
+                            fetch(`https://cmbettingoffers.pythonanywhere.com/adduserprofit/${encodeURIComponent(token)}/${encodeURIComponent(itemData.userid)}/£${encodeURIComponent(profit)}`)
                             .catch(error => {
                                 console.error('There has been a problem with your fetch operation:', error);
                             })
