@@ -265,7 +265,7 @@ function getUsers(token) {
                   newUser.style.display = 'block';
 
                   usersContainer.appendChild(newUser);
-                  
+
                   let contractButton = newUser.querySelector('#support-contract-button');
                   let bankButton = newUser.querySelector('#support-bank-button');
 
@@ -319,7 +319,7 @@ function getUsers(token) {
 
 document.addEventListener('DOMContentLoaded', function() { 
 
-    const token = "f72754b3-cd78-4472-990a-22f581bf10c2";
+    const token = 'f72754b3-cd78-4472-990a-22f581bf10c2';
     getUsers(token);
     setUpDepositListener(token);
     setUpAccountListener(token);
