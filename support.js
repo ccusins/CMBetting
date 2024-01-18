@@ -174,7 +174,7 @@ function setUpAccountListener(token) {
                     accountDepositForm.addEventListener('submit', function(e) {
                         e.preventDefault();
 
-                        let bookieAmount = accountForm.querySelector('#support-add-deposit-amount').value;
+                        let bookieAmount = accountDepositForm.querySelector('#support-add-deposit-amount').value;
                         fetch(`https://cmbettingoffers.pythonanywhere.com/newdeposit/${encodeURIComponent(accountsUserId)}/${encodeURIComponent(bookmaker)}/${encodeURIComponent(bookieAmount)}`)
                         .catch(error => {
                             console.error('There has been a problem with your fetch operation:', error);                
