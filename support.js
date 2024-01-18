@@ -1,3 +1,5 @@
+const { response } = require("express");
+
 function setUpDepositListener(token) {
 
     const findDepositsForm = document.getElementById('support-find-deposits')
@@ -265,6 +267,38 @@ function getUsers(token) {
                   newUser.style.display = 'block';
 
                   usersContainer.appendChild(newUser);
+
+                  let profitForm = newUser.querySelector('#support-users-profit-form');
+                  profitForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    fetch(`https://cmbettingoffers.pythonanywhere.com/checkprofit/${encodeURIComponent(itemData.userid)}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                          }
+                        return response.json()
+                    })
+                    .then(data => {
+                        let isSuccess = data.success;
+                        if (isSuccess) {
+                            let profit = parseFloat(data.profit);
+                            let addProfitValue = parseFloat(profitForm.querySelector('#support-users-profit-value').value);
+                            
+                            profit += addProfitValue;
+                            fetch(`https://cmbettingoffers.pythonanywhere.com/adduserprofit/${encodeURIComponent(token)}/${encodeURIComponent(itemData.userid)}/${encodeURIComponent(profit)}`)
+                            .catch(error => {
+                                console.error('There has been a problem with your fetch operation:', error);
+                            })
+
+
+                        }
+                    })
+                    .catch(error => {
+                        console.error('There has been a problem with your fetch operation:', error);
+                    })
+
+                  });
 
                   let contractButton = newUser.querySelector('#support-contract-button');
                   let bankButton = newUser.querySelector('#support-bank-button');
