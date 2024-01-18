@@ -1,5 +1,3 @@
-const { response } = require("express");
-
 function setUpDepositListener(token) {
 
     const findDepositsForm = document.getElementById('support-find-deposits')
