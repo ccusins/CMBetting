@@ -354,6 +354,7 @@ function getUsers(token) {
 
 document.addEventListener('DOMContentLoaded', function() { 
     
+    console.log('Leia is pretty');
     let token = document.querySelector('.support.token.text').textContent;
     getUsers(token);
     setUpDepositListener(token);
