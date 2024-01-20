@@ -265,7 +265,9 @@ function getUsers(token) {
                   newUser.style.display = 'block';
 
                   usersContainer.appendChild(newUser);
-
+                  
+                  let profitText = newUser.querySelector('#support-users-profit-text');
+        
                   let profitForm = newUser.querySelector('#support-users-profit-form');
                   profitForm.addEventListener('submit', function(e) {
                     e.preventDefault();
@@ -280,25 +282,25 @@ function getUsers(token) {
                     .then(data => {
                         let isSuccess = data.success;
                         if (isSuccess) {
-                            console.log(data);
+
                             let profit = parseFloat(data.profit);
+                            profitText.textContent = profit;
 
                             let addProfitValue = parseFloat(profitForm.querySelector('#support-users-profit-value').value);
-                            console.log(addProfitValue);
                             profit += addProfitValue;
-                            fetch(`https://cmbettingoffers.pythonanywhere.com/adduserprofit/${encodeURIComponent(token)}/${encodeURIComponent(itemData.userid)}/£${encodeURIComponent(profit)}`)
+
+                            roundedProfit = parseFloat(profit.toFixed(2));
+                            
+                            fetch(`https://cmbettingoffers.pythonanywhere.com/adduserprofit/${encodeURIComponent(token)}/${encodeURIComponent(itemData.userid)}/£${encodeURIComponent(roundedProfit)}`)
                             .catch(error => {
                                 console.error('There has been a problem with your fetch operation:', error);
                             })
-                            
-
-
+                            profitText.textContent = roundedProfit;
                         }
                     })
                     .catch(error => {
                         console.error('There has been a problem with your fetch operation:', error);
                     })
-                    profitForm.style.display = "none";
                   });
 
                   let contractButton = newUser.querySelector('#support-contract-button');
@@ -354,7 +356,6 @@ function getUsers(token) {
 
 document.addEventListener('DOMContentLoaded', function() { 
     
-    console.log('Leia is pretty');
     let token = document.querySelector('.support.token.text').textContent;
     getUsers(token);
     setUpDepositListener(token);
