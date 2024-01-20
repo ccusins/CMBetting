@@ -87,11 +87,15 @@ function checkProfit(ID) {
 
         let isSuccess = data.success;
         let profitTitle = document.getElementById('profit-title');
+        let depositsProfitTitle = document.querySelector('h1.deposits.money.profit_text.counter')
+
         if (isSuccess) {
             profitText = data.profit;
             profitTitle.textContent = `£${profitText}`;
+            depositsProfitTitle.textContent = `£${profitText}`;
         } else {
             profitTitle.textContent = "£0";
+            depositsProfitTitle.textContent = "£0";
         }
     })
     .catch(error => {
@@ -176,6 +180,39 @@ function getBookmakers(ID, accountName) {
 }
 
 function getDeposits(ID) {
+
+    let totalText = document.querySelector('h1.deposits.money.our_text.counter')
+    let amountOwedText = document.querySelector('h1.deposits.money.owed_text.counter')
+    let profitText = document.querySelector('h1.deposits.money.profit_text.counter')
+
+    fetch(`https://cmbettingoffers.pythonanywhere.com/checkmoney/${encodeURIComponent(ID)}`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+    })
+    .then(data => {
+        let isSuccess = data.success;
+        if (isSuccess) {
+            total = parseFloat(data.total);
+            let profit = profitText.textContent;
+            let numericProfit = parseFloat(profit.substring(1));
+
+            amountOwed = total - numericProfit;
+
+            totalText.textContent = `£${total}`;
+            amountOwedText.textContent = `£${amountOwed}`;
+
+        } else {
+            totalText.textContent = "£0";
+            amountOwedText = "£0";
+        }
+    })
+    .catch(error => {
+        console.error('There has been a problem with your fetch operation:', error);
+    })
+
     fetch(`https://cmbettingoffers.pythonanywhere.com/getdeposits/${encodeURIComponent(ID)}`)
     .then(response => {
         if (!response.ok) {
@@ -204,10 +241,10 @@ function getDeposits(ID) {
 
                 let completeDeposit = newDeposit.querySelector('.complete_button');
                 completeDeposit.addEventListener('click', function() {
-                    fetch(`https://cmbettingoffers.pythonanywhere.com/pendingdeposit/${encodeURIComponent(ID)}/${encodeURIComponent(deposit.bookmaker)}/pending`)
+                    fetch(`https://cmbettingoffers.pythonanywhere.com/pendingdeposit/${encodeURIComponent(ID)}/${encodeURIComponent(deposit.bookmaker)}`)
                     .catch(error => {
                         console.error('There has been a problem with your fetch operation:', error);
-                    })
+                    });
 
                     container.removeChild(newDeposit)
                 });

@@ -36,9 +36,14 @@ function setUpDepositListener(token) {
                     let statusText = newDeposit.querySelector('.support_deposit_text.status')
                     statusText.textContent = status;
                     
+                    
+                    let notDone = false;
+
                     if (status === 'uncompleted') {
+                        notDone = true;
                         statusText.style.backgroundColor = '#EE746E';
                     } else if (status === 'pending') {
+                        notDone = true;
                         statusText.style.backgroundColor = '#FF954F';
                     } else {
                         statusText.style.backgroundColor = '#77DD77';
@@ -46,14 +51,21 @@ function setUpDepositListener(token) {
                     
                     newDeposit.style.display = "block";
                     depositsContainer.appendChild(newDeposit);
-
                     let confirmDepositButton = newDeposit.querySelector('#confirm-button-deposit')
-                    confirmDepositButton.addEventListener('click', function() {
-                        fetch(`https://cmbettingoffers.pythonanywhere.com/pendingdeposit/${encodeURIComponent(token)}/${encodeURIComponent(depositsUserId)}/${encodeURIComponent(bookmaker)}/done`)
-                        .catch(error => {
-                            console.error('There has been a problem with your fetch operation:', error);                
-                        })
-                    });
+
+                    if (notDone) {
+                        
+                        confirmDepositButton.addEventListener('click', function() {
+                            fetch(`https://cmbettingoffers.pythonanywhere.com/confirmdeposit/${encodeURIComponent(token)}/${encodeURIComponent(depositsUserId)}/${encodeURIComponent(bookmaker)}/${encodeURIComponent(amount)}`)
+                            .catch(error => {
+                                console.error('There has been a problem with your fetch operation:', error);                
+                            })
+                            statusText.textContent = "done";
+                            statusText.style.backgroundColor = "#77DD77";
+                        });
+                    } else {
+                        confirmDepositButton.style.display = "none";
+                    }
                 });
 
             }
@@ -266,6 +278,31 @@ function getUsers(token) {
 
                   usersContainer.appendChild(newUser);
                   
+                  let totalText = newUser.querySelector('#support-users-total-text')
+                  fetch(`https://cmbettingoffers.pythonanywhere.com/checkmoney/${encodeURIComponent(itemData.userid)}`)
+                  .then(response => {return response.json()})
+                  .then(data => {
+                    let isSuccess = data.success;
+                    if (isSuccess) {
+                        totalText.textContent = `User Total: £${data.total}`;
+                    }
+                  })
+                  .catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                  });
+                
+                  let addTotalForm = newUser.querySelector('#support-users-add-money-form')
+                  addTotalForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    let addAmount = addTotalForm.querySelector('#support-users-add-money-value').value;
+                    fetch(`https://cmbettingoffers.pythonanywhere.com/addmoney/${encodeURIComponent(token)}/${encodeURIComponent(itemData.userid)}/${encodeURIComponent(addAmount)}`)
+                    .catch(error => {
+                        console.error('There has been a problem with your fetch operation:', error);
+                    })
+                    addTotalForm.style.display = "none";
+                  });
+
                   let profitText = newUser.querySelector('#support-users-profit-text');
                   fetch(`https://cmbettingoffers.pythonanywhere.com/checkprofit/${encodeURIComponent(itemData.userid)}`)
                     .then(response => {
@@ -278,7 +315,7 @@ function getUsers(token) {
                         let isSuccess = data.success;
                         if (isSuccess) {
                             profit = data.profit;
-                            profitText.textContent = profit;
+                            profitText.textContent = `User Profit: £${profit}`;
                         }
                     })
                     .catch(error => {
