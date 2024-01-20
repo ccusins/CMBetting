@@ -267,6 +267,23 @@ function getUsers(token) {
                   usersContainer.appendChild(newUser);
                   
                   let profitText = newUser.querySelector('#support-users-profit-text');
+                  fetch(`https://cmbettingoffers.pythonanywhere.com/checkprofit/${encodeURIComponent(itemData.userid)}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                            }
+                        return response.json()
+                    })
+                    .then(data => {
+                        let isSuccess = data.success;
+                        if (isSuccess) {
+                            profit = data.profit;
+                            profitText.textContent = profit;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('There has been a problem with your fetch operation:', error);
+                    })
         
                   let profitForm = newUser.querySelector('#support-users-profit-form');
                   profitForm.addEventListener('submit', function(e) {
