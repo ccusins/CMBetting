@@ -116,6 +116,7 @@ function getBookmakers(ID, accountName) {
     .then(data => {
         let isSuccess = data.success;
         if (isSuccess) {
+
             let bookmakerCounter = 0;
 
             let bookmakerHolders = document.querySelectorAll('.bookmaker_holder');
@@ -164,6 +165,59 @@ function getBookmakers(ID, accountName) {
                         })
                     });
                 }
+            });
+
+            let casinoHolders = document.querySelectorAll('.casino_holder')
+            casinoHolders.forEach(casinoHolder => {
+
+                let casinoTitle = casinoHolder.querySelector('h1.casino_title').textContent;
+                let casinoStatusText = casinoHolder.querySelector('h1.casino_status_text');
+                let casinoLinkButton = casinoHolder.querySelector('.casino_link');
+                let casinoEnterDetailsButton = casinoHolder.querySelector('.casino_show_form');                
+                
+                let casinoFound = false;
+
+                if (isSuccess) {
+                    casinoFound = data.bookmakers.some(item => item.bookmaker === casinoTitle);
+                }
+                
+                if (casinoFound) {
+
+                    bookmakerCounter++;
+
+                    casinoStatusText.textContent = "MADE";
+                    casinoStatusText.style.backgroundColor = "lightgreen";
+                    casinoStatusText.style.fontFamily = "Montserrat, sans-serif";
+                    casinoStatusText.style.fontWeight = "bold";
+
+                    casinoEnterDetailsButton.style.display = "none";
+                    casinoLinkButton.style.display = "none";
+
+                } else {
+                    casinoStatusText.textContent = "NOT MADE";
+                    casinoStatusText.style.backgroundColor = "lightred";
+                    casinoStatusText.style.fontFamily = "Montserrat, sans-serif";
+                    casinoStatusText.style.fontWeight = "bold";
+
+                    let casinoEnterDetailsForm = casinoHolder.querySelector('#casino-form')
+
+                    casinoEnterDetailsForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+
+                        let casinoUsername = casinoEnterDetailsForm.querySelector('#casino-username').value;
+                        let casinoEmail = casinoEnterDetailsForm.querySelector('#casino-email-address').value;
+                        let casinoAccountSetting = casinoEnterDetailsForm.querySelector('#casino-account-setting').value;
+
+                        fetch(`https://cmbettingoffers.pythonanywhere.com/addbookmakerdetails/${encodeURIComponent(accountName)}/${encodeURIComponent(casinoTitle)}/${encodeURIComponent(casinoUsername)}/${encodeURIComponent(casinoEmail)}/${encodeURIComponent(casinoAccountSetting)}/${encodeURIComponent(ID)}`)
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+
+                    });
+                    
+                }
+
+
             });
 
             let bookmakerCounterText = document.querySelector('h1.stat_title.accounts');
@@ -265,6 +319,46 @@ function getDeposits(ID) {
     });
 }
 
+function setUpSwitchListener() {
+
+    let casinoSwitchButton = document.querySelector('.accounts.switch.casino')
+    let bookmakerSwitchButton = document.querySelector('.accounts.switch.bookmaker')
+
+    let casinoRowsHolder = document.querySelector('.casino_rows')
+    let bookmakerRowsHolder = document.querySelector('.bookmaker_rows')
+
+    casinoSwitchButton.addEventListener('click', function() {
+        
+        casinoRowsHolder.style.display = "flex";
+        casinoRowsHolder.style.flexDirection = "column";
+        bookmakerRowsHolder.style.display = "none";
+        
+        casinoSwitchButton.style.backgroundColor = "#74d2e8";
+        casinoSwitchButton.style.color = "#444343";
+
+        bookmakerSwitchButton.style.backgroundColor = "#303030";
+        bookmakerSwitchButton.style.color = "white";
+
+    });
+
+    bookmakerSwitchButton.addEventListener('click', function() {
+        
+        bookmakerRowsHolder.style.display = "flex";
+        bookmakerRowsHolder.style.flexDirection = "column";
+        casinoRowsHolder.style.display = "none";
+
+        bookmakerSwitchButton.style.backgroundColor = "#74d2e8";
+        bookmakerSwitchButton.style.color = "#444343";
+
+        casinoSwitchButton.style.backgroundColor = "#303030";
+        casinoSwitchButton.style.color = "white";
+
+
+    });
+}   
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
 
     let currentUrl = window.location.href;
@@ -273,6 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let username = document.querySelector('h1.account_username').textContent;
 
     checkUserStatus(ID, username);
+    setUpSwitchListener();
     checkProfit(ID);
     getBookmakers(ID, username);
     getDeposits(ID);
