@@ -276,42 +276,46 @@ function getDeposits(ID) {
     })
     .then(data => {
 
-        for (let i = 0; i < data.data.length; i++) {
+        let isSuccess = data.success 
+        
+        if (isSuccess) {
+            for (let i = 0; i < data.data.length; i++) {
 
-            let deposit = data.data[i];
-            const uncompleteDepositTemplate = document.getElementById('uncomplete-deposit-template');
-            const pendingDepositTemplate = document.getElementById('pending-deposit-template');
-            const container = document.getElementById('deposits-container');
+                let deposit = data.data[i];
+                const uncompleteDepositTemplate = document.getElementById('uncomplete-deposit-template');
+                const pendingDepositTemplate = document.getElementById('pending-deposit-template');
+                const container = document.getElementById('deposits-container');
 
-            let depositStatus = deposit.status;
+                let depositStatus = deposit.status;
 
-            if (depositStatus === 'uncompleted') {
-                let newDeposit = uncompleteDepositTemplate.cloneNode(true);
+                if (depositStatus === 'uncompleted') {
+                    let newDeposit = uncompleteDepositTemplate.cloneNode(true);
 
-                newDeposit.style.display = 'block'; 
-                newDeposit.querySelector('.deposits_bookmaker_title').innerText = deposit.bookmaker;
-                newDeposit.querySelector('.deposits_amount_title').innerText = deposit.amount;
-                container.appendChild(newDeposit);
+                    newDeposit.style.display = 'block'; 
+                    newDeposit.querySelector('.deposits_bookmaker_title').innerText = deposit.bookmaker;
+                    newDeposit.querySelector('.deposits_amount_title').innerText = deposit.amount;
+                    container.appendChild(newDeposit);
 
-                let completeDeposit = newDeposit.querySelector('.complete_button');
-                completeDeposit.addEventListener('click', function() {
-                    fetch(`https://cmbettingoffers.pythonanywhere.com/pendingdeposit/${encodeURIComponent(ID)}/${encodeURIComponent(deposit.bookmaker)}`)
-                    .catch(error => {
-                        console.error('There has been a problem with your fetch operation:', error);
+                    let completeDeposit = newDeposit.querySelector('.complete_button');
+                    completeDeposit.addEventListener('click', function() {
+                        fetch(`https://cmbettingoffers.pythonanywhere.com/pendingdeposit/${encodeURIComponent(ID)}/${encodeURIComponent(deposit.bookmaker)}`)
+                        .catch(error => {
+                            console.error('There has been a problem with your fetch operation:', error);
+                        });
+
+                        container.removeChild(newDeposit)
                     });
 
-                    container.removeChild(newDeposit)
-                });
+                } else if (depositStatus === 'pending') {
+                    let newDeposit = pendingDepositTemplate.cloneNode(true);
+                    newDeposit.style.display = 'block'; 
+                    newDeposit.querySelector('.deposits_bookmaker_title').innerText = deposit.bookmaker;
+                    newDeposit.querySelector('.deposits_amount_title').innerText = deposit.amount;
+                    container.appendChild(newDeposit);
+                }
 
-            } else if (depositStatus === 'pending') {
-                let newDeposit = pendingDepositTemplate.cloneNode(true);
-                newDeposit.style.display = 'block'; 
-                newDeposit.querySelector('.deposits_bookmaker_title').innerText = deposit.bookmaker;
-                newDeposit.querySelector('.deposits_amount_title').innerText = deposit.amount;
-                container.appendChild(newDeposit);
-            }
-
-        };
+            };
+        }
 
     })
     .catch(error => {
