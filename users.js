@@ -24,14 +24,14 @@ function checkUserStatus(ID, username) {
             if (contract === 'done' && bank === 'done') {
                 
                 let disabledMenuItems = document.querySelectorAll('.menu_item_container.disabled');
-                for (let i = 0; i < disabledMenuItems.length; i++) {
-                    disabledMenuItems[i].style.display = 'none';
-                }
+                disabledMenuItems.forEach(disabledMenuItem => {
+                    disabledMenuItem.style.display = "none";
+                });
                 
                 let enabledMenuItems = document.querySelectorAll('.menu_item_container.enabled');
-                for (let i = 0; i < enabledMenuItems.length; i++) {
-                    enabledMenuItems[i].style.display = 'block';
-                }
+                enabledMenuItems.forEach(enabledMenuItem => {
+                    enabledMenuItem.style.display = "block";
+                });
             }
 
             if (contract === 'pending') {
@@ -114,117 +114,117 @@ function getBookmakers(ID, accountName) {
         return response.json();
     })
     .then(data => {
+
         let isSuccess = data.success;
-        if (isSuccess) {
+    
+        let bookmakerCounter = 0;
 
-            let bookmakerCounter = 0;
+        let bookmakerHolders = document.querySelectorAll('.bookmaker_holder');
+        bookmakerHolders.forEach(holder => {
 
-            let bookmakerHolders = document.querySelectorAll('.bookmaker_holder');
-            bookmakerHolders.forEach(holder => {
+            let bookmaker = holder.querySelector("h1.bookmaker_title").textContent;
+            
+            found = false;
 
-                let found = false;
-                let bookmaker = holder.querySelector("h1.bookmaker_title").textContent;
+            if (isSuccess) {
+                found = data.bookmakers.some(item => item.bookmaker === bookmaker);
+            } 
 
-                if (isSuccess) {
-                    found = data.bookmakers.some(item => item.bookmaker === bookmaker);
-                }
 
-                let statusHolder = holder.querySelector(".bookmaker_status_holder");
-                let statusTitle = holder.querySelector(".bookmaker_status_title");
-                let enterDetailsButton = holder.querySelector(".show_form");
-                let bookmakerLink = holder.querySelector(".bookmaker_link");
+            let statusHolder = holder.querySelector(".bookmaker_status_holder");
+            let statusTitle = holder.querySelector(".bookmaker_status_title");
+            let enterDetailsButton = holder.querySelector(".show_form");
+            let bookmakerLink = holder.querySelector(".bookmaker_link");
 
-                if (found) {
+            if (found) {
 
-                    statusTitle.textContent = "MADE";
-                    statusHolder.style.backgroundColor = "lightgreen";
-                    statusTitle.style.fontFamily = "Montserrat, sans-serif";
-                    statusTitle.style.fontWeight = "bold";
+                statusTitle.textContent = "MADE";
+                statusHolder.style.backgroundColor = "lightgreen";
+                statusTitle.style.fontFamily = "Montserrat, sans-serif";
+                statusTitle.style.fontWeight = "bold";
 
-                    enterDetailsButton.style.display = "none";
-                    bookmakerLink.style.display = "none";
+                enterDetailsButton.style.display = "none";
+                bookmakerLink.style.display = "none";
 
-                    bookmakerCounter++;
-                } else {
-                    statusTitle.textContent = "NOT MADE";
-                    statusHolder.style.backgroundColor = "lightred";
-                    statusTitle.style.fontFamily = "Montserrat, sans-serif";
-                    statusTitle.style.fontWeight = "bold";
+                bookmakerCounter++;
 
-                    let addBookmakerDetailsForm = holder.querySelector('.bookmaker_form');
-                    addBookmakerDetailsForm.addEventListener('submit', function(e) {
-                        e.preventDefault();
+            } else {
+                statusTitle.textContent = "NOT MADE";
+                statusHolder.style.backgroundColor = "lightred";
+                statusTitle.style.fontFamily = "Montserrat, sans-serif";
+                statusTitle.style.fontWeight = "bold";
 
-                        let username = holder.querySelector('.text_field.username').value;
-                        let email = holder.querySelector('.text_field.email').value;
-                        let accountSetting = holder.querySelector('.text_field.account_setting').value;
-
-                        fetch(`https://cmbettingoffers.pythonanywhere.com/addbookmakerdetails/${encodeURIComponent(accountName)}/${encodeURIComponent(bookmaker)}/${encodeURIComponent(username)}/${encodeURIComponent(email)}/${encodeURIComponent(accountSetting)}/${encodeURIComponent(ID)}`)
-                        .catch(error => {
-                            console.error('Error:', error);
-                        })
-                    });
-                }
-            });
-
-            let casinoHolders = document.querySelectorAll('.casino_holder')
-            casinoHolders.forEach(casinoHolder => {
-
-                let casinoTitle = casinoHolder.querySelector('h1.casino_title').textContent;
-                let casinoStatusText = casinoHolder.querySelector('h1.casino_status_text');
-                let casinoLinkButton = casinoHolder.querySelector('.casino_link');
-                let casinoEnterDetailsButton = casinoHolder.querySelector('.casino_show_form');                
-                
-                let casinoFound = false;
-
-                if (isSuccess) {
-                    casinoFound = data.bookmakers.some(item => item.bookmaker === casinoTitle);
-                }
-                
-                if (casinoFound) {
-
-                    bookmakerCounter++;
-
-                    casinoStatusText.textContent = "MADE";
-                    casinoStatusText.style.backgroundColor = "lightgreen";
-                    casinoStatusText.style.fontFamily = "Montserrat, sans-serif";
-                    casinoStatusText.style.fontWeight = "bold";
-
-                    casinoEnterDetailsButton.style.display = "none";
-                    casinoLinkButton.style.display = "none";
-
-                } else {
-                    casinoStatusText.textContent = "NOT MADE";
-                    casinoStatusText.style.backgroundColor = "lightred";
-                    casinoStatusText.style.fontFamily = "Montserrat, sans-serif";
-                    casinoStatusText.style.fontWeight = "bold";
-
-                    let casinoEnterDetailsForm = casinoHolder.querySelector('#casino-form')
-
-                    casinoEnterDetailsForm.addEventListener('submit', function(e) {
-                        e.preventDefault();
-
-                        let casinoUsername = casinoEnterDetailsForm.querySelector('#casino-username').value;
-                        let casinoEmail = casinoEnterDetailsForm.querySelector('#casino-email-address').value;
-                        let casinoAccountSetting = casinoEnterDetailsForm.querySelector('#casino-account-setting').value;
-
-                        fetch(`https://cmbettingoffers.pythonanywhere.com/addbookmakerdetails/${encodeURIComponent(accountName)}/${encodeURIComponent(casinoTitle)}/${encodeURIComponent(casinoUsername)}/${encodeURIComponent(casinoEmail)}/${encodeURIComponent(casinoAccountSetting)}/${encodeURIComponent(ID)}`)
-                        .catch(error => {
-                            console.error('Error:', error);
-                        });
-
-                    });
+                let addBookmakerDetailsForm = holder.querySelector('.bookmaker_form');
+                addBookmakerDetailsForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
                     
-                }
+                    let username = holder.querySelector('.text_field.username').value;
+                    let email = holder.querySelector('.text_field.email').value;
+                    let accountSetting = holder.querySelector('.text_field.account_setting').value;
+
+                    fetch(`https://cmbettingoffers.pythonanywhere.com/addbookmakerdetails/${encodeURIComponent(accountName)}/${encodeURIComponent(bookmaker)}/${encodeURIComponent(username)}/${encodeURIComponent(email)}/${encodeURIComponent(accountSetting)}/${encodeURIComponent(ID)}`)
+                    .catch(error => {
+                        console.error('Error:', error);
+                    })
+                });
+            }
+        });
+
+        let casinoHolders = document.querySelectorAll('.casino_holder')
+        casinoHolders.forEach(casinoHolder => {
+
+            let casinoTitle = casinoHolder.querySelector('h1.casino_title').textContent;
+            let casinoStatusText = casinoHolder.querySelector('h1.casino_status_text');
+            let casinoLinkButton = casinoHolder.querySelector('.casino_link');
+            let casinoEnterDetailsButton = casinoHolder.querySelector('.casino_show_form');                
+            
+            let casinoFound = false;
+
+            if (isSuccess) {
+                casinoFound = data.bookmakers.some(item => item.bookmaker === casinoTitle);
+            }
+            
+            if (casinoFound) {
+
+                bookmakerCounter++;
+
+                casinoStatusText.textContent = "MADE";
+                casinoStatusText.style.backgroundColor = "lightgreen";
+                casinoStatusText.style.fontFamily = "Montserrat, sans-serif";
+                casinoStatusText.style.fontWeight = "bold";
+
+                casinoEnterDetailsButton.style.display = "none";
+                casinoLinkButton.style.display = "none";
+
+            } else {
+                casinoStatusText.textContent = "NOT MADE";
+                casinoStatusText.style.backgroundColor = "lightred";
+                casinoStatusText.style.fontFamily = "Montserrat, sans-serif";
+                casinoStatusText.style.fontWeight = "bold";
+
+                let casinoEnterDetailsForm = casinoHolder.querySelector('#casino-form')
+
+                casinoEnterDetailsForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    let casinoUsername = casinoEnterDetailsForm.querySelector('#casino-username').value;
+                    let casinoEmail = casinoEnterDetailsForm.querySelector('#casino-email-address').value;
+                    let casinoAccountSetting = casinoEnterDetailsForm.querySelector('#casino-account-setting').value;
+
+                    fetch(`https://cmbettingoffers.pythonanywhere.com/addbookmakerdetails/${encodeURIComponent(accountName)}/${encodeURIComponent(casinoTitle)}/${encodeURIComponent(casinoUsername)}/${encodeURIComponent(casinoEmail)}/${encodeURIComponent(casinoAccountSetting)}/${encodeURIComponent(ID)}`)
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+
+                });
+                
+            }
 
 
-            });
+        });
 
-            let bookmakerCounterText = document.querySelector('h1.stat_title.accounts');
-            bookmakerCounterText.textContent = bookmakerCounter.toString();
-
-        }
-
+        let bookmakerCounterText = document.querySelector('h1.stat_title.accounts');
+        bookmakerCounterText.textContent = bookmakerCounter.toString();
 
     })
     .catch(error => {
@@ -276,12 +276,11 @@ function getDeposits(ID) {
     })
     .then(data => {
 
-        let isSuccess = data.success 
+        let isSuccess = data.success;
         
         if (isSuccess) {
-            for (let i = 0; i < data.data.length; i++) {
+            data.data.forEach(deposit => {
 
-                let deposit = data.data[i];
                 const uncompleteDepositTemplate = document.getElementById('uncomplete-deposit-template');
                 const pendingDepositTemplate = document.getElementById('pending-deposit-template');
                 const container = document.getElementById('deposits-container');
@@ -314,7 +313,7 @@ function getDeposits(ID) {
                     container.appendChild(newDeposit);
                 }
 
-            };
+            });
         }
 
     })
