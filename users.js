@@ -254,6 +254,7 @@ function getDeposits(ID) {
             let numericProfit = parseFloat(profit.substring(1));
 
             amountOwed = total - numericProfit;
+            amountOwed = amountOwed.toFixed(2);
 
             totalText.textContent = `£${total}`;
             amountOwedText.textContent = `£${amountOwed}`;
