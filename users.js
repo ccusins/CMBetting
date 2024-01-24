@@ -235,34 +235,22 @@ function getBookmakers(ID, accountName) {
 
 function getDeposits(ID) {
 
-    let totalText = document.querySelector('h1.deposits.money.our_text.counter')
-    let amountOwedText = document.querySelector('h1.deposits.money.owed_text.counter')
-    let profitText = document.querySelector('h1.deposits.money.profit_text.counter')
+    let totalWithdrawals = document.querySelector('#deposits-withdrawal-counter')
+    let profitText = document.querySelector('#deposits-profit-counter')
+    let netBalanceText = document.querySelector('#deposits-net-counter')
 
-    fetch(`https://cmbettingoffers.pythonanywhere.com/checkmoney/${encodeURIComponent(ID)}`)
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-    })
+    fetch(`https://cmbettingoffers.pythonanywhere.com/getmoneyinfo/${encodeURIComponent(ID)}`)
+    .then(response => {  return response.json(); })
     .then(data => {
         let isSuccess = data.success;
         if (isSuccess) {
-            total = parseFloat(data.total);
-            let profit = profitText.textContent;
-            let numericProfit = parseFloat(profit.substring(1));
-
-            amountOwed = total - numericProfit;
-            amountOwed = amountOwed.toFixed(2);
-
-            totalText.textContent = `£${total}`;
-            amountOwedText.textContent = `£${amountOwed}`;
-
-        } else {
-            totalText.textContent = "£0";
-            amountOwedText = "£0";
-        }
+            console.log(data);
+            profitText.textContent = `£${data.profit}`;
+            if (data.withdrawals) {
+                totalWithdrawals.textContent = `£${data.withdrawals}`;
+            }
+            netBalanceText.textContent = `£${data.netposition}`;
+        } 
     })
     .catch(error => {
         console.error('There has been a problem with your fetch operation:', error);
