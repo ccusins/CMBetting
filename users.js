@@ -374,8 +374,7 @@ function addAffiliateListener(ID, affiliateForm, affiliateContainer) {
 
 function setUpAffiliates(ID) {
 
-    let codeText = document.querySelector('#affiliate-code');
-    codeText.textContent = ID;
+    
 
     fetch(`https://cmbettingoffers.pythonanywhere.com/affiliatedata/${encodeURIComponent(ID)}`)
     .then(response => {return response.json()})
@@ -383,6 +382,7 @@ function setUpAffiliates(ID) {
         
         let isSuccess = data.success;
         
+        let codeText = document.querySelector('#affiliate-code');
         let earningsText = document.querySelector('#affiliate-earnings');
         let signupsText = document.querySelector('#affiliate-signups');
         let affiliateContainer = document.querySelector('#affiliate-container');
@@ -390,6 +390,7 @@ function setUpAffiliates(ID) {
         let affiliateForm = document.querySelector('#affiliate-form');
 
         if (isSuccess) {
+            codeText.textContent = data.code;
             earningsText.textContent = `£${data.earnings}`;
             signupsText.textContent = data.signups;
             
@@ -405,7 +406,7 @@ function setUpAffiliates(ID) {
         } else {
             earningsText.textContent = "£0";
             signupsText.textContent = "0";
-
+            codeText.textContent = 'affiliate code not found - please reload';
         }
     })
     .catch(error => {
