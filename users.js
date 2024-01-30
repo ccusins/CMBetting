@@ -349,6 +349,70 @@ function setUpSwitchListener() {
     });
 }   
 
+function addAffiliateListener(ID, affiliateForm, affiliateContainer) {
+
+    let errorMessage = affiliateContainer.querySelector('#affiliate-error');
+
+    affiliateForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        let codeApplied = affiliateForm.querySelector('#affiliate-form-value').value;
+        fetch(`https://cmbettingoffers.pythonanywhere.com/addaffiliate/${encodeURIComponent(ID)}/${encodeURIComponent(codeApplied)}`)
+        .then(response => {return response.json()})
+        .then(data => {
+            let isSuccess = data.success;
+
+            if (isSuccess) {
+                setUpAffiliates(ID);
+            } else {
+                errorMessage.style.display = "block";
+            }
+        })
+
+    });
+}
+
+function setUpAffiliates(ID) {
+
+    let codeText = document.querySelector('#affiliate-code');
+    codeText.textContent = ID;
+
+    fetch(`https://cmbettingoffers.pythonanywhere.com/affiliatedata/${encodeURIComponent(ID)}`)
+    .then(response => {return response.json()})
+    .then(data => {
+        
+        let isSuccess = data.success;
+        
+        let earningsText = document.querySelector('#affiliate-earnings');
+        let signupsText = document.querySelector('#affiliate-signups');
+        let affiliateContainer = document.querySelector('#affiliate-container');
+        let affiliateHeader = document.querySelector('#affiliate-header');
+        let affiliateForm = document.querySelector('#affiliate-form');
+
+        if (isSuccess) {
+            earningsText.textContent = `£${data.earnings}`;
+            signupsText.textContent = data.signups;
+            
+            if (data.codeused) {
+                affiliateContainer.style.backgroundColor = "#42d16d";
+                affiliateForm.style.display = "none";
+                affiliateHeader.textContent = "Affiliate Code Applied";
+                affiliateHeader.style.color = "#303030";
+            } else {
+                addAffiliateListener(ID, affiliateForm, affiliateContainer);
+            }
+
+        } else {
+            earningsText.textContent = "£0";
+            signupsText.textContent = "0";
+
+        }
+    })
+    .catch(error => {
+        console.error('There has been a problem with your fetch operation:', error);
+    });
+
+}
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -363,5 +427,6 @@ document.addEventListener('DOMContentLoaded', function() {
     checkProfit(ID);
     getBookmakers(ID, username);
     getDeposits(ID);
+    setUpAffiliates(ID);
 
 });
