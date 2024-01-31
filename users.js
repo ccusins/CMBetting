@@ -1,5 +1,9 @@
 function checkUserStatus(ID, username) {
 
+    let contactInfoBlock = document.querySelector('#contact-info-block');
+    let contractInfoBlock = document.querySelector('#contract-info-block');
+    let accountsInfoBlock = document.querySelector('#accounts-info-block');
+
     fetch(`https://cmbettingoffers.pythonanywhere.com/checkstatus/${encodeURIComponent(ID)}`)
     .then(response => {
         if (!response.ok) {
@@ -23,6 +27,12 @@ function checkUserStatus(ID, username) {
 
             if (contract === 'done' && bank === 'done') {
                 
+                contactInfoBlock.style.display = 'none';
+
+                accountsInfoBlock.style.display = 'flex';
+                accountsInfoBlock.style.flexDirection = 'column';
+                
+
                 let disabledMenuItems = document.querySelectorAll('.menu_item_container.disabled');
                 disabledMenuItems.forEach(disabledMenuItem => {
                     disabledMenuItem.style.display = "none";
@@ -32,6 +42,14 @@ function checkUserStatus(ID, username) {
                 enabledMenuItems.forEach(enabledMenuItem => {
                     enabledMenuItem.style.display = "block";
                 });
+            } else {
+                
+                contactInfoBlock.style.display = 'none';
+                
+                contractInfoBlock.style.display = 'flex';
+                contractInfoBlock.style.flexDirection = 'column';
+
+                
             }
 
             if (contract === 'pending') {
@@ -55,6 +73,7 @@ function checkUserStatus(ID, username) {
             }
 
         } else {
+            
             const setUpForm = document.getElementById('contact-form');
             setUpForm.addEventListener('submit', function(e) {
                 e.preventDefault();
