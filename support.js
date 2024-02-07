@@ -1,3 +1,28 @@
+function loadMoneyInfo(ID) {
+
+    let totalWithdrawals = document.querySelector('#support-total-text')
+    let profitText = document.querySelector('#support-profit-text')
+    let netBalanceText = document.querySelector('#support-owed-text')
+
+    fetch(`https://cmbettingoffers.pythonanywhere.com/getmoneyinfo/${encodeURIComponent(ID)}`)
+    .then(response => {return response.json()})
+    .then(data => {
+        let isSuccess = data.success;
+        if (isSuccess) {
+
+            profitText.textContent = `£${data.profit}`;
+            if (data.withdrawals) {
+                totalWithdrawals.textContent = `£${data.withdrawals}`;
+            }
+            netBalanceText.textContent = `£${data.netposition}`;
+
+        }
+    })
+    .catch(error => {
+        console.error('There has been a problem with your fetch operation:', error);
+    });
+}
+
 function addDepositListener(token, accountsUserId, bookmaker, newAccount) {
     
     let accountDepositForm = newAccount.querySelector('#support-add-deposit');
@@ -160,6 +185,7 @@ function setWithdrawalListener(token, userid, bookmaker, newAccount) {
             fetch(`https://cmbettingoffers.pythonanywhere.com/addwithdrawal/${encodeURIComponent(token)}/${encodeURIComponent(userid)}/${encodeURIComponent(bookmaker)}/${encodeURIComponent(amount)}`)
             .then(response => { return response.json() })
             .then(data => {
+                loadMoneyInfo(userid);
                 loadWithdrawals(token, userid, bookmaker, newAccount);
             })
             .catch(error => {
@@ -262,6 +288,7 @@ function setProfitListener(token, userid, bookmaker, newAccount) {
         .then(response => { return response.json(); })
         .then(data => {
             loadProfit(token, userid, bookmaker, newAccount);
+            loadMoneyInfo(userid);
         })
         .catch(error => {
             console.error('There has been a problem with your fetch operation:', error);
@@ -310,8 +337,9 @@ function setUpAccountListener(token) {
     const findAccountsForm = document.getElementById('support-find-accounts')
     findAccountsForm.addEventListener('submit', function(e) {
         e.preventDefault();
-
+        
         const accountsUserId = document.getElementById('support-find-id-accounts').value;
+        loadMoneyInfo(accountsUserId);
         fetch(`https://cmbettingoffers.pythonanywhere.com/getbookmakerdetails/${encodeURIComponent(token)}/${encodeURIComponent(accountsUserId)}`)
         .then(response => {
             if (!response.ok) {

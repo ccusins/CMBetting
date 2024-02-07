@@ -263,7 +263,6 @@ function getDeposits(ID) {
     .then(data => {
         let isSuccess = data.success;
         if (isSuccess) {
-            console.log(data);
             profitText.textContent = `£${data.profit}`;
             if (data.withdrawals) {
                 totalWithdrawals.textContent = `£${data.withdrawals}`;
