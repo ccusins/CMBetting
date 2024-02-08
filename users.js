@@ -1,3 +1,291 @@
+function setFundRequestListner(ID, stageHolder, amount) {
+    
+    let fundRequestButton = stageHolder.querySelector('.nb_button');
+    
+    fundRequestButton.addEventListener('click', function() {
+        fetch(`https://cmbettingoffers.pythonanywhere.com/newfundrequest/${encodeURIComponent(ID)}/${encodeURIComponent(amount)}`)
+        .then(response => { return response.json() })
+        .then(data => {
+            let isSuccess = data.success;
+
+            if (isSuccess) {
+                loadFundRequests(ID, stageHolder);
+            }
+        })
+        .catch(error => {
+            console.error('Problem with adding skip bookmaker details fetch', error);
+        });
+    });
+}
+
+function loadFundRequests(ID, stageHolder, amount) {
+
+    let nbContainer = stageHolder.querySelector('.nb_container');
+    let texts = nbContainer.querySelectorAll('.text')
+    let fundsRequestButton = stageHolder.querySelector('.nb_button');
+
+    fetch(`https://cmbettingoffers.pythonanywhere.com/getunfinishedfundrequests/${encodeURIComponent(ID)}`)
+    .then(response => { return response.json() })
+    .then(data => {
+        let isSuccess = data.success;
+
+        if (isSuccess) {
+    
+            texts[0].style.display = 'none';
+            texts[1].textContent = 'Funds were requested successfully - please wait for them to be provided to continue.';
+            texts[1].style.fontWeight = "bold";
+            fundsRequestButton.style.display = 'none';
+            nbContainer.style.backgroundColor = '#FF954F';
+            
+        } else {
+            setFundRequestListner(ID, stageHolder, amount);
+        }
+    })
+    .catch(error => {
+        console.error('Problem with getting unfinished fund requests', error);
+    });
+}
+
+function setSkipListner(ID, accountName, bookmakerHolder) {
+    let skipButton = bookmakerHolder.querySelector('#skip-bookmaker-button');
+    skipButton.addEventListener('click', function() {
+        let bookmaker = bookmakerHolder.querySelector('.bookmaker_title').textContent;
+        fetch(`https://cmbettingoffers.pythonanywhere.com/addbookmakerdetails/${encodeURIComponent(accountName)}/${encodeURIComponent(bookmaker)}/NA/NA/NA/${encodeURIComponent(ID)}`)    
+        .then( response => { return response.json() })
+        .then(data => { 
+            setBookmakerToDone(bookmakerHolder);
+        })
+        .catch(error => {
+            console.error('Problem with adding skip bookmaker details fetch', error);
+        });
+    });
+}
+
+function checkFundsForStage(netBalance, stageHolder, ID) {
+    
+    let bookmakerHolders = stageHolder.querySelectorAll('.bookmaker_holder');
+    let runningDeposit = 0;
+    let fundsNeededContainer = stageHolder.querySelector('.nb_container');
+    let successContainer = stageHolder.querySelector('#stage1-funds-success')
+
+    bookmakerHolders.forEach(bookmakerHolder => {
+
+        let depositAmountTextHolder = bookmakerHolder.querySelector('.bookmaker_title.deposit');
+
+        const computedStyle = window.getComputedStyle(depositAmountTextHolder);
+        const isVisible = computedStyle.display !== 'none';
+
+        if (isVisible) {
+
+            let depositAmountText = depositAmountTextHolder.textContent;
+            
+            let depositMatch = depositAmountText.match(/\d+/);
+
+            let depositAmount = depositMatch ? parseInt(depositMatch[0], 10) : 0;
+            runningDeposit += depositAmount;
+        }
+
+    });
+    
+    if (runningDeposit < netBalance) {
+        
+        fundsNeededContainer.style.display = 'block';
+
+    } else {
+        if (successContainer) {
+            successContainer.style.display = 'none';
+        }
+
+        let amountNeeded = runningDeposit - netBalance;
+        let amountNeededText = stageHolder.querySelector('#acc-fundsneeded');
+        amountNeededText.textContent = ` £${amountNeeded}`;
+
+        bookmakerHolders.forEach(bookmakerHolder => {
+            let isDone = bookmakerHolder.classList.contains("done");
+            if (!isDone) {
+
+                let disabledText = bookmakerHolder.querySelector('.disabled_ag_text');
+                disabledText.style.display = 'block';
+
+                bookmakerHolder.style.backgroundColor = '#ed746e';
+                let statusText = bookmakerHolder.querySelector('.bookmaker_status_holder');
+                statusText.style.display = 'none';
+
+                let linkButton = bookmakerHolder.querySelector('.bookmaker_link');
+                linkButton.style.display = 'none';
+
+                let detailsButton = bookmakerHolder.querySelector('.show_form');
+                detailsButton.style.display = 'none';
+
+                let bookmakerTitle = bookmakerHolder.querySelector('.bookmaker_title');
+                bookmakerTitle.style.color = '#1d1c1c';
+
+                let depositTitle = bookmakerHolder.querySelector('.bookmaker_title.deposit');
+                depositTitle.style.color = '#1d1c1c';
+
+                let alreadyGotButton = bookmakerHolder.querySelector('#skip-bookmaker-button');
+                alreadyGotButton.style.border = "1px solid black";
+                alreadyGotButton.style.color = '#1d1c1c';
+
+
+            }
+        });
+        
+
+        loadFundRequests(ID, stageHolder, amountNeeded);
+
+    }
+}
+
+function setBookmakerListener(ID, accountName, bookmakerHolder) {
+
+    let bookmaker = bookmakerHolder.querySelector('.bookmaker_title').textContent;
+    
+    let addDetailsForm = bookmakerHolder.querySelector('.bookmaker_form');
+    addDetailsForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        let username = addDetailsForm.querySelector('.text_field.username').value;
+        let accountSetting = addDetailsForm.querySelector('.text_field.account_setting').value;
+        let email = addDetailsForm.querySelector('.text_field.email').value;
+
+        fetch(`https://cmbettingoffers.pythonanywhere.com/addbookmakerdetails/${encodeURIComponent(accountName)}/${encodeURIComponent(bookmaker)}/${encodeURIComponent(username)}/${encodeURIComponent(email)}/${encodeURIComponent(accountSetting)}/${encodeURIComponent(ID)}`)
+        .then(response => { return response.json() })
+        .then(data => {
+            addDetailsForm.style.display = 'none';
+            setBookmakerToDone(bookmakerHolder);
+        })
+        .catch(error => {
+            console.error('Problem with add bookmaker details fetch', error);
+        });
+    });
+}
+
+function setBookmakerToDone(bookmakerHolder) {
+
+    let link = bookmakerHolder.querySelector('.bookmaker_link');
+    let showFormButton = bookmakerHolder.querySelector('.show_form');
+
+    if (link) {
+        link.style.display = 'none';
+    }
+
+    showFormButton.style.display = 'none';
+
+    let statusHolder = bookmakerHolder.querySelector('.bookmaker_status_holder');
+    let statusText = bookmakerHolder.querySelector('.bookmaker_status_title');
+
+    let depositText = bookmakerHolder.querySelector('.bookmaker_title.deposit');
+    depositText.style.display = 'none';
+
+    let skipButton = bookmakerHolder.querySelector('#skip-bookmaker-button');
+    skipButton.style.display = 'none';
+
+    statusText.textContent = 'DONE';    
+    statusHolder.style.backgroundColor = '#77DD77';
+    
+    bookmakerHolder.classList.add("done");
+    
+}
+
+function loadBookmakerAccounts(ID, accountName) {
+
+    fetch(`https://cmbettingoffers.pythonanywhere.com/getbookmakers/${encodeURIComponent(ID)}`)
+    .then( response => { return response.json()})
+    .then(data => {
+        let isSuccess = data.success;
+        let bookmakers = ['none'];
+
+        if (isSuccess) {
+            bookmakers = data.bookmakers;
+        }
+        
+        let isCurrentStage = false;
+        let i = 1;
+        while (!isCurrentStage) {
+            
+            if (i === 10) {
+                isCurrentStage = true;
+                break;
+            }
+            let holderId = `stage-${i}-container`;
+
+            let stageHolder = document.querySelector(`#${holderId}`);
+            if (stageHolder) {
+                let bookmakerHolders = stageHolder.querySelectorAll('.bookmaker_holder');
+                bookmakerHolders.forEach(bookmakerHolder => {
+                    let bookmakerTitle = bookmakerHolder.querySelector('.bookmaker_title').textContent;
+                    let found = false;
+                    found = bookmakers.some(item => item.bookmaker === bookmakerTitle);
+                    
+                    if (!found) {
+                        isCurrentStage = true;
+                        setBookmakerListener(ID, accountName, bookmakerHolder);
+                        setSkipListner(ID, accountName, bookmakerHolder);
+                    } else {
+                        setBookmakerToDone(bookmakerHolder);
+                    }
+
+                });
+            
+                if (isCurrentStage) {
+                    
+                    fetch(`https://cmbettingoffers.pythonanywhere.com/getmoneyinfo/${encodeURIComponent(ID)}`)
+                    .then(response => {  return response.json(); })
+                    .then(data => {
+                        let isSuccess = data.success;
+                        if (isSuccess) {
+
+                            let totalWithdrawals = document.querySelector('#deposits-withdrawal-counter')
+                            let profitText = document.querySelector('#deposits-profit-counter')
+                            let netBalanceText = document.querySelector('#deposits-net-counter')
+
+                            profitText.textContent = `£${data.profit}`;
+                            if (data.withdrawals) {
+                                totalWithdrawals.textContent = `£${data.withdrawals}`;
+                            }
+                            netBalance = data.netposition;
+                            netBalanceText.textContent = `£${netBalance}`;
+                
+                            stageHolder.style.display = 'flex';
+                            stageHolder.style.flexDirection = 'column';
+                            
+                            let stageperc = (((i-1)/9)*100).toFixed(0);
+                            let progressBarFill = document.querySelector('#background-fill');
+                            if (progressBarFill) {
+                                progressBarFill.style.width = `${stageperc}%`;
+                            } else {
+                                console.log('no fill bar found');
+                            }
+                            
+                            let progressBarText = document.querySelector('.progressperc');
+                            if (progressBarText) {
+                                progressBarText.textContent = `${stageperc}%`;
+                            }
+                            checkFundsForStage(netBalance, stageHolder, ID);                        
+                        } 
+                    })
+                    .catch(error => {
+                        console.error('Problem with get money info fetch', error);
+                    });
+
+                    
+                } else {
+                    stageHolder.style.display = 'none';
+                }
+            } else {
+                console.log('stage holder not found');
+            }
+            
+            i++;
+        };
+            
+    })
+    .catch(error => {
+        console.error('Problem with get bookmakers fetch', error);
+    });
+}
+
 function checkUserStatus(ID, username) {
 
     let contactInfoBlock = document.querySelector('#contact-info-block');
@@ -105,174 +393,22 @@ function checkProfit(ID) {
     .then(data => {
 
         let isSuccess = data.success;
-        let profitTitle = document.getElementById('profit-title');
-        let depositsProfitTitle = document.querySelector('h1.deposits.money.profit_text.counter')
+        let profitTitle = document.querySelector('#profit-title');
 
         if (isSuccess) {
             profitText = data.profit;
             profitTitle.textContent = `£${profitText}`;
-            depositsProfitTitle.textContent = `£${profitText}`;
         } else {
             profitTitle.textContent = "£0";
-            depositsProfitTitle.textContent = "£0";
         }
     })
     .catch(error => {
-        console.error('There has been a problem with your fetch operation:', error);
-    })
-
-}
-
-function getBookmakers(ID, accountName) {
-
-    fetch(`https://cmbettingoffers.pythonanywhere.com/getbookmakers/${encodeURIComponent(ID)}`)
-    .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-
-        let isSuccess = data.success;
-    
-        let bookmakerCounter = 0;
-
-        let bookmakerHolders = document.querySelectorAll('.bookmaker_holder');
-        bookmakerHolders.forEach(holder => {
-
-            let bookmaker = holder.querySelector("h1.bookmaker_title").textContent;
-            
-            found = false;
-
-            if (isSuccess) {
-                found = data.bookmakers.some(item => item.bookmaker === bookmaker);
-            } 
-
-
-            let statusHolder = holder.querySelector(".bookmaker_status_holder");
-            let statusTitle = holder.querySelector(".bookmaker_status_title");
-            let enterDetailsButton = holder.querySelector(".show_form");
-            let bookmakerLink = holder.querySelector(".bookmaker_link");
-
-            if (found) {
-
-                statusTitle.textContent = "MADE";
-                statusHolder.style.backgroundColor = "lightgreen";
-                statusTitle.style.fontFamily = "Montserrat, sans-serif";
-                statusTitle.style.fontWeight = "bold";
-
-                enterDetailsButton.style.display = "none";
-                bookmakerLink.style.display = "none";
-
-                bookmakerCounter++;
-
-            } else {
-                statusTitle.textContent = "NOT MADE";
-                statusHolder.style.backgroundColor = "lightred";
-                statusTitle.style.fontFamily = "Montserrat, sans-serif";
-                statusTitle.style.fontWeight = "bold";
-
-                let addBookmakerDetailsForm = holder.querySelector('.bookmaker_form');
-                addBookmakerDetailsForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    let username = holder.querySelector('.text_field.username').value;
-                    let email = holder.querySelector('.text_field.email').value;
-                    let accountSetting = holder.querySelector('.text_field.account_setting').value;
-
-                    fetch(`https://cmbettingoffers.pythonanywhere.com/addbookmakerdetails/${encodeURIComponent(accountName)}/${encodeURIComponent(bookmaker)}/${encodeURIComponent(username)}/${encodeURIComponent(email)}/${encodeURIComponent(accountSetting)}/${encodeURIComponent(ID)}`)
-                    .catch(error => {
-                        console.error('Error:', error);
-                    })
-                });
-            }
-        });
-
-        let casinoHolders = document.querySelectorAll('.casino_holder')
-        casinoHolders.forEach(casinoHolder => {
-
-            let casinoTitle = casinoHolder.querySelector('h1.casino_title').textContent;
-            let casinoStatusText = casinoHolder.querySelector('h1.casino_status_text');
-            let casinoLinkButton = casinoHolder.querySelector('.casino_link');
-            let casinoEnterDetailsButton = casinoHolder.querySelector('.casino_show_form');                
-            
-            let casinoFound = false;
-
-            if (isSuccess) {
-                casinoFound = data.bookmakers.some(item => item.bookmaker === casinoTitle);
-            }
-            
-            if (casinoFound) {
-
-                bookmakerCounter++;
-
-                casinoStatusText.textContent = "MADE";
-                casinoStatusText.style.backgroundColor = "lightgreen";
-                casinoStatusText.style.fontFamily = "Montserrat, sans-serif";
-                casinoStatusText.style.fontWeight = "bold";
-
-                casinoEnterDetailsButton.style.display = "none";
-                casinoLinkButton.style.display = "none";
-
-            } else {
-                casinoStatusText.textContent = "NOT MADE";
-                casinoStatusText.style.backgroundColor = "lightred";
-                casinoStatusText.style.fontFamily = "Montserrat, sans-serif";
-                casinoStatusText.style.fontWeight = "bold";
-
-                let casinoEnterDetailsForm = casinoHolder.querySelector('#casino-form')
-
-                casinoEnterDetailsForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-
-                    let casinoUsername = casinoEnterDetailsForm.querySelector('#casino-username').value;
-                    let casinoEmail = casinoEnterDetailsForm.querySelector('#casino-email-address').value;
-                    let casinoAccountSetting = casinoEnterDetailsForm.querySelector('#casino-account-setting').value;
-
-                    fetch(`https://cmbettingoffers.pythonanywhere.com/addbookmakerdetails/${encodeURIComponent(accountName)}/${encodeURIComponent(casinoTitle)}/${encodeURIComponent(casinoUsername)}/${encodeURIComponent(casinoEmail)}/${encodeURIComponent(casinoAccountSetting)}/${encodeURIComponent(ID)}`)
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-
-                });
-                
-            }
-
-
-        });
-
-        let bookmakerCounterText = document.querySelector('h1.stat_title.accounts');
-        bookmakerCounterText.textContent = bookmakerCounter.toString();
-
-    })
-    .catch(error => {
-        console.error('Error:', error);
+        console.error('Problem with check profit fetch', error);
     })
 
 }
 
 function getDeposits(ID) {
-
-    let totalWithdrawals = document.querySelector('#deposits-withdrawal-counter')
-    let profitText = document.querySelector('#deposits-profit-counter')
-    let netBalanceText = document.querySelector('#deposits-net-counter')
-
-    fetch(`https://cmbettingoffers.pythonanywhere.com/getmoneyinfo/${encodeURIComponent(ID)}`)
-    .then(response => {  return response.json(); })
-    .then(data => {
-        let isSuccess = data.success;
-        if (isSuccess) {
-            profitText.textContent = `£${data.profit}`;
-            if (data.withdrawals) {
-                totalWithdrawals.textContent = `£${data.withdrawals}`;
-            }
-            netBalanceText.textContent = `£${data.netposition}`;
-        } 
-    })
-    .catch(error => {
-        console.error('There has been a problem with your fetch operation:', error);
-    })
 
     fetch(`https://cmbettingoffers.pythonanywhere.com/getdeposits/${encodeURIComponent(ID)}`)
     .then(response => {
@@ -306,7 +442,7 @@ function getDeposits(ID) {
                     completeDeposit.addEventListener('click', function() {
                         fetch(`https://cmbettingoffers.pythonanywhere.com/pendingdeposit/${encodeURIComponent(ID)}/${encodeURIComponent(deposit.bookmaker)}`)
                         .catch(error => {
-                            console.error('There has been a problem with your fetch operation:', error);
+                            console.error('Problem with pending deposit fetch:', error);
                         });
 
                         container.removeChild(newDeposit)
@@ -325,7 +461,7 @@ function getDeposits(ID) {
 
     })
     .catch(error => {
-        console.error('There has been a problem with your fetch operation:', error);
+        console.error('Problem with get deposits fetch:', error);
     });
 }
 
@@ -392,8 +528,6 @@ function addAffiliateListener(ID, affiliateForm, affiliateContainer) {
 
 function setUpAffiliates(ID) {
 
-    
-
     fetch(`https://cmbettingoffers.pythonanywhere.com/affiliatedata/${encodeURIComponent(ID)}`)
     .then(response => {return response.json()})
     .then(data => {
@@ -444,7 +578,7 @@ document.addEventListener('DOMContentLoaded', function() {
     checkUserStatus(ID, username);
     setUpSwitchListener();
     checkProfit(ID);
-    getBookmakers(ID, username);
+    loadBookmakerAccounts(ID, username);
     getDeposits(ID);
     setUpAffiliates(ID);
 
