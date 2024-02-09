@@ -21,7 +21,7 @@ function setFundRequestListner(ID, stageHolder, amount) {
 function loadFundRequests(ID, stageHolder, amount) {
 
     let nbContainer = stageHolder.querySelector('.nb_container');
-    let texts = nbContainer.querySelectorAll('.text')
+    let texts = nbContainer.querySelectorAll('.text.nb')
     let fundsRequestButton = stageHolder.querySelector('.nb_button');
 
     fetch(`https://cmbettingoffers.pythonanywhere.com/getunfinishedfundrequests/${encodeURIComponent(ID)}`)
@@ -34,9 +34,11 @@ function loadFundRequests(ID, stageHolder, amount) {
             texts[0].style.display = 'none';
             texts[1].textContent = 'Funds were requested successfully - please wait for them to be provided to continue.';
             texts[1].style.fontWeight = "bold";
+            texts[1].style.color = "#303030";
             texts[2].style.display = 'none';
             fundsRequestButton.style.display = 'none';
             nbContainer.style.backgroundColor = '#FF954F';
+            nbContainer.style.border = 'none';
             
         } else {
             setFundRequestListner(ID, stageHolder, amount);
