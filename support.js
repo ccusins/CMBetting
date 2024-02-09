@@ -1,3 +1,52 @@
+
+function setCompleteFundListener(token, completeButton, ID, amount) {
+    completeButton.addEventListener('click', function() {
+        fetch(`https://cmbettingoffers.pythonanywhere.com/completefundrequest/${encodeURIComponent(token)}/${encodeURIComponent(ID)}/${encodeURIComponent(amount)}`)
+        .then(response => { return response.json() })
+        .then(data => {
+            sLoadFundRequests(token, ID);
+        })
+        .catch(error => {
+            console.error('Problem with complete fund requests', error);
+        });
+    });
+}
+function sLoadFundRequests(token, ID) {
+
+    fetch(`https://cmbettingoffers.pythonanywhere.com/getunfinishedfundrequests/${encodeURIComponent(ID)}`)
+    .then(response => {return response.json()})
+    .then(data => {
+        let isSuccess = data.success;
+        if (isSuccess) {
+            let amount = data.amount;
+
+            let frContainer = document.querySelector('#fr-container');
+            frContainer.style.display = 'flex';
+            frContainer.style.flexDirection = 'row';
+            
+            let amountText = document.querySelector('#fr-text');
+            amountText.textContent = `Amount: ${amount}`;
+
+            let completeButton = document.querySelector('#fr-button');
+            setCompleteFundListener(token, completeButton, ID, amount);
+        } 
+    })
+    .catch(error => {
+        console.error('problem with fund reqeusts:', error);
+    });  
+}
+
+function fundFormListener(token) {
+    let fundForm = document.querySelector('#support-funds');
+
+    fundForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        let ID = fundForm.querySelector('#support-find-id-funds').value;
+        sLoadFundRequests(token, ID);
+    });
+}
+
 function loadMoneyInfo(ID) {
 
     let totalWithdrawals = document.querySelector('#support-total-text')
@@ -573,6 +622,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let token = document.querySelector('.support.token.text').textContent;
     getUsers(token); 
     setUpAccountListener(token);
+    fundFormListener(token);
     
 }); 
 

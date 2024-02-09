@@ -34,6 +34,7 @@ function loadFundRequests(ID, stageHolder, amount) {
             texts[0].style.display = 'none';
             texts[1].textContent = 'Funds were requested successfully - please wait for them to be provided to continue.';
             texts[1].style.fontWeight = "bold";
+            texts[2].style.display = 'none';
             fundsRequestButton.style.display = 'none';
             nbContainer.style.backgroundColor = '#FF954F';
             
@@ -87,14 +88,12 @@ function checkFundsForStage(netBalance, stageHolder, ID) {
 
     });
     
-    if (runningDeposit < netBalance) {
+    if (runningDeposit <= netBalance) {        
         
-        fundsNeededContainer.style.display = 'block';
+        successContainer.style.display = 'block';
 
     } else {
-        if (successContainer) {
-            successContainer.style.display = 'none';
-        }
+        fundsNeededContainer.style.display = 'block';
 
         let amountNeeded = runningDeposit - netBalance;
         let amountNeededText = stageHolder.querySelector('#acc-fundsneeded');
