@@ -107,7 +107,7 @@ function checkFundsForStage(netBalance, stageHolder, ID) {
                 let disabledText = bookmakerHolder.querySelector('.disabled_ag_text');
                 disabledText.style.display = 'block';
 
-                bookmakerHolder.style.backgroundColor = '#ed746e';
+                bookmakerHolder.style.backgroundColor = '#EE746E';
                 let statusText = bookmakerHolder.querySelector('.bookmaker_status_holder');
                 statusText.style.display = 'none';
 
@@ -118,16 +118,14 @@ function checkFundsForStage(netBalance, stageHolder, ID) {
                 detailsButton.style.display = 'none';
 
                 let bookmakerTitle = bookmakerHolder.querySelector('.bookmaker_title');
-                bookmakerTitle.style.color = '#1d1c1c';
+                bookmakerTitle.style.color = '#303030';
 
                 let depositTitle = bookmakerHolder.querySelector('.bookmaker_title.deposit');
-                depositTitle.style.color = '#1d1c1c';
+                depositTitle.style.color = '#303030';
 
                 let alreadyGotButton = bookmakerHolder.querySelector('#skip-bookmaker-button');
-                alreadyGotButton.style.border = "1px solid black";
-                alreadyGotButton.style.color = '#1d1c1c';
-
-
+                alreadyGotButton.style.border = "1px solid #303030";
+                alreadyGotButton.style.color = '#303030';
             }
         });
         
@@ -250,7 +248,7 @@ function loadBookmakerAccounts(ID, accountName) {
                             stageHolder.style.display = 'flex';
                             stageHolder.style.flexDirection = 'column';
                             
-                            let stageperc = (((i-1)/9)*100).toFixed(0);
+                            let stageperc = (((i-2)/9)*100).toFixed(0);
                             let progressBarFill = document.querySelector('#background-fill');
                             if (progressBarFill) {
                                 progressBarFill.style.width = `${stageperc}%`;
@@ -286,11 +284,31 @@ function loadBookmakerAccounts(ID, accountName) {
     });
 }
 
+function enableMenuItems() {
+    let disabledItems = document.querySelectorAll('.menu_item_container.disabled');
+    let enabledItems = document.querySelectorAll('.menu_item_container.enabled');
+
+    disabledItems.forEach(disabledItem => {
+        disabledItem.style.display = 'none';
+    });
+
+    enabledItems.forEach(enabledItem => {
+        enabledItem.style.display = 'block';
+    });
+}
+
 function checkUserStatus(ID, username) {
 
-    let contactInfoBlock = document.querySelector('#contact-info-block');
-    let contractInfoBlock = document.querySelector('#contract-info-block');
-    let accountsInfoBlock = document.querySelector('#accounts-info-block');
+    let setUpForm = document.querySelector('#contact-form');
+    let contactInfo = document.querySelector('#contact-info');
+    let bcInfo = document.querySelector('#bc-info');
+    let setUpBlocks = document.querySelector('#set-ups');
+    let contractBlock = document.querySelector('#set-up-contract');
+    let contractStatus = contractBlock.querySelector('#status-contract');
+    let bankBlock = document.querySelector('#set-up-bank');
+    let bankStatus = bankBlock.querySelector('#status-bank');
+    let setUpTitle = document.querySelector('#setup-title');
+    let setUpContainer = document.querySelector('#setup-container');
 
     fetch(`https://cmbettingoffers.pythonanywhere.com/checkstatus/${encodeURIComponent(ID)}`)
     .then(response => {
@@ -300,69 +318,45 @@ function checkUserStatus(ID, username) {
         return response.json()
     })
     .then(data => {
+
         let isSuccess = data.success;
         if (isSuccess) {
-            let notDoneContactContainer = document.querySelector('.set_up_item_container.notdone.contact');
-            let doneContactContainer = document.querySelector('.set_up_item_container.done.contact');
-            notDoneContactContainer.style.display = "none";
-            doneContactContainer.style.display = "block";
 
-            let notDoneContractContainer = document.querySelector('.set_up_item_container.notdone.contract');
-            let notDoneBankContainer = document.querySelector('.set_up_item_container.notdone.bank');
-
-            contract = data.contract;
-            bank = data.bank;
+            setUpForm.style.display = 'none';
+            contactInfo.style.display = 'none';
+            
+            setUpBlocks.style.display = 'flex';
+            setUpBlocks.style.flexDirection = 'row';
+            
+            let contract = data.contract;
+            let bank = data.bank;
 
             if (contract === 'done' && bank === 'done') {
-                
-                contactInfoBlock.style.display = 'none';
+                enableMenuItems();
 
-                accountsInfoBlock.style.display = 'flex';
-                accountsInfoBlock.style.flexDirection = 'column';
-                
-
-                let disabledMenuItems = document.querySelectorAll('.menu_item_container.disabled');
-                disabledMenuItems.forEach(disabledMenuItem => {
-                    disabledMenuItem.style.display = "none";
-                });
-                
-                let enabledMenuItems = document.querySelectorAll('.menu_item_container.enabled');
-                enabledMenuItems.forEach(enabledMenuItem => {
-                    enabledMenuItem.style.display = "block";
-                });
             } else {
                 
-                contactInfoBlock.style.display = 'none';
-                
-                contractInfoBlock.style.display = 'flex';
-                contractInfoBlock.style.flexDirection = 'column';
+                setUpContainer.style.display = 'flex';
+                setUpContainer.style.flexDirection = 'column';
 
-                
+                setUpTitle.textContent = 'Sign Contract and Provide Bank Details';
+                if (contract === 'done') {
+                    contractBlock.style.backgroundColor = '#77DD77';
+                    contractStatus.textContent = 'RECEIVED';
+
+                } 
+                if (bank === 'done') {
+                    bankBlock.style.backgroundColor = '#77DD77';
+                    bankStatus.textContent = 'RECEIVED';
+                } 
             }
-
-            if (contract === 'pending') {
-                let pendingContractContainer = document.querySelector('.set_up_item_container.pending.contract');
-                pendingContractContainer.style.display = "block";
-                notDoneContractContainer.style.display = "none";
-            } else if (contract === 'done') {
-                let doneContractContainer  = document.querySelector('.set_up_item_container.done.contract');
-                doneContractContainer.style.display = "block";
-                notDoneContractContainer.style.display = "none";
-            }
-
-            if (bank === 'pending') {
-                let pendingBankContainer = document.querySelector('.set_up_item_container.pending.bank');
-                pendingBankContainer.style.display = "block";
-                notDoneContractContainer = "none";
-            } else if (bank === 'done') {
-                let doneBankContainer = document.querySelector('.set_up_item_container.done.bank');
-                doneBankContainer.style.display = "block";
-                notDoneBankContainer.style.display = "none";
-            }
-
+            
         } else {
             
-            const setUpForm = document.getElementById('contact-form');
+            setUpContainer.style.display = 'flex';
+            setUpContainer.style.flexDirection = 'column';
+
+            bcInfo.style.display = 'none';
             setUpForm.addEventListener('submit', function(e) {
                 e.preventDefault();
 
@@ -370,9 +364,13 @@ function checkUserStatus(ID, username) {
                 let email = setUpForm.querySelector('#email-set-up').value; 
 
                 fetch(`https://cmbettingoffers.pythonanywhere.com/adduser/${encodeURIComponent(username)}/${encodeURIComponent(ID)}/${encodeURIComponent(phone)}/${encodeURIComponent(email)}`)
+                .then(response => { return response.json() })
+                .then(data => {
+                  checkUserStatus(ID, username);  
+                })
                 .catch(error => {
                     console.error('There has been a problem with your fetch operation:', error);
-                })
+                });
             });
         }
     })
@@ -465,43 +463,43 @@ function getDeposits(ID) {
     });
 }
 
-function setUpSwitchListener() {
+// function setUpSwitchListener() {
 
-    let casinoSwitchButton = document.querySelector('.accounts.switch.casino')
-    let bookmakerSwitchButton = document.querySelector('.accounts.switch.bookmaker')
+//     let casinoSwitchButton = document.querySelector('.accounts.switch.casino')
+//     let bookmakerSwitchButton = document.querySelector('.accounts.switch.bookmaker')
 
-    let casinoRowsHolder = document.querySelector('.casino_rows')
-    let bookmakerRowsHolder = document.querySelector('.bookmaker_rows')
+//     let casinoRowsHolder = document.querySelector('.casino_rows')
+//     let bookmakerRowsHolder = document.querySelector('.bookmaker_rows')
 
-    casinoSwitchButton.addEventListener('click', function() {
+//     casinoSwitchButton.addEventListener('click', function() {
         
-        casinoRowsHolder.style.display = "flex";
-        casinoRowsHolder.style.flexDirection = "column";
-        bookmakerRowsHolder.style.display = "none";
+//         casinoRowsHolder.style.display = "flex";
+//         casinoRowsHolder.style.flexDirection = "column";
+//         bookmakerRowsHolder.style.display = "none";
         
-        casinoSwitchButton.style.backgroundColor = "#74d2e8";
-        casinoSwitchButton.style.color = "#444343";
+//         casinoSwitchButton.style.backgroundColor = "#74d2e8";
+//         casinoSwitchButton.style.color = "#444343";
 
-        bookmakerSwitchButton.style.backgroundColor = "#303030";
-        bookmakerSwitchButton.style.color = "white";
+//         bookmakerSwitchButton.style.backgroundColor = "#303030";
+//         bookmakerSwitchButton.style.color = "white";
 
-    });
+//     });
 
-    bookmakerSwitchButton.addEventListener('click', function() {
+//     bookmakerSwitchButton.addEventListener('click', function() {
         
-        bookmakerRowsHolder.style.display = "flex";
-        bookmakerRowsHolder.style.flexDirection = "column";
-        casinoRowsHolder.style.display = "none";
+//         bookmakerRowsHolder.style.display = "flex";
+//         bookmakerRowsHolder.style.flexDirection = "column";
+//         casinoRowsHolder.style.display = "none";
 
-        bookmakerSwitchButton.style.backgroundColor = "#74d2e8";
-        bookmakerSwitchButton.style.color = "#444343";
+//         bookmakerSwitchButton.style.backgroundColor = "#74d2e8";
+//         bookmakerSwitchButton.style.color = "#444343";
 
-        casinoSwitchButton.style.backgroundColor = "#303030";
-        casinoSwitchButton.style.color = "white";
+//         casinoSwitchButton.style.backgroundColor = "#303030";
+//         casinoSwitchButton.style.color = "white";
 
 
-    });
-}   
+//     });
+// }   
 
 function addAffiliateListener(ID, affiliateForm, affiliateContainer) {
 
@@ -567,6 +565,19 @@ function setUpAffiliates(ID) {
 
 }
 
+function setDepositListener(ID) {
+    let depositMenuButton = document.querySelector('#deposits-menu-button');
+    depositMenuButton.addEventListener('click', function() {
+        getDeposits(ID);
+    });
+}
+
+function setAccountListener(ID, username) {
+    let accountMenuButton = document.querySelector('#accounts-menu-button');
+    accountMenuButton.addEventListener('click', function() {
+        loadBookmakerAccounts(ID, username);
+    });
+}
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -576,10 +587,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let username = document.querySelector('h1.account_username').textContent;
 
     checkUserStatus(ID, username);
-    setUpSwitchListener();
+    // setUpSwitchListener();
     checkProfit(ID);
-    loadBookmakerAccounts(ID, username);
-    getDeposits(ID);
+    // loadBookmakerAccounts(ID, username);
+    setDepositListener(ID);
+    setAccountListener(ID, username);
     setUpAffiliates(ID);
 
 });
