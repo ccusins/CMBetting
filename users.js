@@ -138,9 +138,24 @@ function checkFundsForStage(netBalance, stageHolder, ID) {
 
 function setBookmakerListener(ID, accountName, bookmakerHolder) {
 
+    let showFormButton = bookmakerHolder.querySelector('.show_form');
+    let addDetailsForm = bookmakerHolder.querySelector('.bookmaker_form');
+
+    let formVisible = false;
+
+    showFormButton.addEventListener('click', function() {
+        if (!formVisible) {
+            addDetailsForm.style.display = 'block';
+            formVisible = true;
+        } else {
+            addDetailsForm.style.display = 'none';
+            formVisible = false;
+        }
+    });
+
     let bookmaker = bookmakerHolder.querySelector('.bookmaker_title').textContent;
     
-    let addDetailsForm = bookmakerHolder.querySelector('.bookmaker_form');
+    
     addDetailsForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -286,15 +301,16 @@ function loadBookmakerAccounts(ID, accountName) {
 }
 
 function enableMenuItems() {
-    let disabledItems = document.querySelectorAll('.menu_item_container.disabled');
-    let enabledItems = document.querySelectorAll('.menu_item_container.enabled');
+    let disabledItems = document.querySelectorAll('.menu_button.disabled');
+    let enabledItems = document.querySelectorAll('.menu_button.enabled');
 
     disabledItems.forEach(disabledItem => {
         disabledItem.style.display = 'none';
     });
 
     enabledItems.forEach(enabledItem => {
-        enabledItem.style.display = 'block';
+        enabledItem.style.display = 'flex';
+        enabledItem.style.flexDirection = 'row';
     });
 }
 
@@ -580,6 +596,52 @@ function setAccountListener(ID, username) {
     });
 }
 
+function setMenuListner() {
+    
+    const menuButtons = document.querySelectorAll('.menu_button.enabled');
+    
+    menuButtons.forEach((button, index) => {
+        // Define the data target for each button
+        const targetContainerId = 'container' + (index + 1);
+        
+        // Set the data-target attribute on the button
+        button.setAttribute('data-target', targetContainerId);
+    });
+
+    menuButtons.forEach(menuButton => {
+        menuButton.addEventListener('click', function() {
+
+            const targetContainerId = menuButton.getAttribute('data-target');
+
+            menuButtons.forEach(btn => {
+                if (btn != menuButton) {
+                    if (btn.classList.contains('active')) {
+                        btn.classList.remove('active');
+                    }
+                } else {
+                    if (!btn.classList.contains('active')) {
+                        btn.classList.add('active');
+
+                    }
+                }
+
+                let containers = document.querySelectorAll('.container');
+                containers.forEach(container => {
+                    if (container.id === targetContainerId) {
+                        container.style.display = 'flex';
+                        container.style.flexDirection = 'column';
+                    } else {
+                        container.style.display = 'none';
+                    }
+                    
+                });
+            });
+        });
+    });
+
+    
+}
+
 document.addEventListener('DOMContentLoaded', function() {
 
     let currentUrl = window.location.href;
@@ -587,10 +649,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let ID = parts[parts.length - 1];
     let username = document.querySelector('h1.account_username').textContent;
 
+    setMenuListner();
     checkUserStatus(ID, username);
-    // setUpSwitchListener();
     checkProfit(ID);
-    // loadBookmakerAccounts(ID, username);
     setDepositListener(ID);
     setAccountListener(ID, username);
     setUpAffiliates(ID);
